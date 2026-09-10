@@ -1,4 +1,7 @@
-This project uses CMake and vcpkg for managing C++ dependencies. It serves as a simple example to test your build setup before we get into more complicted code.
+## Testing vec3
+`cmake --preset=default && cd buildVCPkg && cmake --build . && ./utests/utest_vec3`
+
+This project uses CMake and vcpkg for managing C++ dependencies. It serves as a simple example to test your build setup before we get into more complicated code.
 
 ## Building Using CMake Presets
 
@@ -28,7 +31,7 @@ Before you get too deep into this, you will need some tools, depending on your o
 
 ### Linux
 
-The following command in Ubuntu (or related) Linux will get you most of what you might
+The following command in Ubuntu (or related) Linux will get you most of what you might need
 
 ```
 sudo apt update
