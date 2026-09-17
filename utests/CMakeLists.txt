@@ -23,6 +23,7 @@ set(UTESTS
   utest_Failure
   utest_vec3
   utest_color
+  utest_ray
   )
 
 # 
