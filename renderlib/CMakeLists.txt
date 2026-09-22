@@ -1,14 +1,17 @@
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
 add_library(renderlib
-    vec3.h
-    color.h
-    ray.h
-    Framebuffer.h
-    Framebuffer.cpp
-    Camera.h
-    Camera.cpp
+Camera.cpp
+Camera.h
+color.h
+Framebuffer.cpp
+Framebuffer.h
+ray.h
+vec3.h
 )
+
+# target_link_libraries(renderlib PUBLIC PNG::PNG)
+# target_link_libraries(renderlib PUBLIC ZLIB::ZLIB)
 
 add_executable(main main.cpp)
 

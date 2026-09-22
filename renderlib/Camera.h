@@ -4,9 +4,10 @@ class Camera {
   public:
     Camera();
     Camera(int width, int height);
-    virtual ~Camera();
+    Camera(const vec3 &origin, const vec3 &U, const vec3 &V, const vec3 &W, float focalLength, int width, int height);
+    // virtual ~Camera();
 
-    virtual void generateRay(int i, int j, ray &r) = 0;
+    virtual ray generateRay(float i, float j) = 0;
 
     int getWidth() const { return width; };
     int getHeight() const { return height; };
@@ -14,20 +15,35 @@ class Camera {
     int getRightBound() const { return width / 2; };
     int getTopBound() const { return height / 2; };
     int getBottomBound() const { return -height / 2; };
+    vec3 getPosition() const { return origin; }
 
   protected:
     vec3 U, V, W;
     vec3 origin;
     int width, height;
+    float focalLength;
 };
 
 class PerspectiveCamera : public Camera {
   public:
+    /// @brief
     PerspectiveCamera();
+    /// @brief
+    /// @param width
+    /// @param height
     PerspectiveCamera(int width, int height);
-    ~PerspectiveCamera();
+    /// @brief
+    /// @param origin
+    /// @param U
+    /// @param V
+    /// @param W
+    /// @param focalLength
+    /// @param width
+    /// @param height
+    PerspectiveCamera(const vec3 &origin, const vec3 &U, const vec3 &V, const vec3 &W, float focalLength, int width, int height);
+    // ~PerspectiveCamera();
 
-    void generateRay(int i, int j, ray &r) override;
+    ray generateRay(float i, float j) override;
 };
 
 // Camera *cameraPtr = new PerspectiveCamera();
