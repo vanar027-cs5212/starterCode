@@ -2,30 +2,30 @@
 #define FRAMEBUFFER_H 1
 
 #include <vector>
-#include "color.h"
+#include "Color.h"
 
 class Framebuffer {
 
   public:
-    Framebuffer(int w, int h);
+    Framebuffer(int width, int height);
     Framebuffer();
 
-    int getWidth();
-    int getHeight();
-    int getLength();
+    int getWidth() const;
+    int getHeight() const;
+    int getLength() const;
 
     void clear();
-    void clearToColor(const color &color);
-    void clearToGradient(const color &gradientStart, const color &gradientEnd);
-    void clearToTricolor(const color &c1, const color &c2, const color &c3, bool vertical = true);
+    void clearToColor(const Color &color);
+    void clearToGradient(const Color &gradientStart, const Color &gradientEnd);
+    void clearToTricolor(const Color &c1, const Color &c2, const Color &c3, bool vertical = true);
 
-    void setPixelColor(int i, int j, const color &c);
-    void setPixelColor(int idx, const color &c);
+    void setPixelColor(int x, int y, const Color &c);
+    void setPixelColor(int idx, const Color &c);
 
-    void exportAsPNG(const std::string &filename);
+    void exportAsPNG(const std::string &filename) const;
 
   private:
-    std::vector<color> fbStorage;
+    std::vector<Color> fbStorage;
     int width, height;
 };
 #endif// FRAMEBUFFER_H

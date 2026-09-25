@@ -1,37 +1,88 @@
 #include <filesystem>
 #include "Framebuffer.h"
 #include "Camera.h"
+#include "Sphere.h"
+#include "Shader.h"
 
 
 using namespace std;
 
+string fpath(const string &filename) { return filesystem::absolute(filename).string(); }
+
+void raytraceImg(Framebuffer &fb, float focal_length, float viewport_width) {
+  Camera *rayCam = new PerspectiveCamera(fb.getWidth(), fb.getHeight(), viewport_width, focal_length);
+  Shader *rayVis = new RayVisualizer();
+
+  for (int y = 0; y < fb.getHeight(); ++y) {
+    for (int x = 0; x < fb.getWidth(); ++x) {
+      Ray r = rayCam->generateRay(x, y);
+      fb.setPixelColor(x, y, rayVis->getColor(r));
+    }
+  }
+}
+float step(float current) {
+  if (current < 5.0f)
+    return 0.1f;
+  else// if (current < 50.0f)
+    return 1.0f;
+  // else
+  // return 5.0f;
+}
+
 int main(int argc, char **argv) {
-  Framebuffer fb(200, 200);
+  Framebuffer fb(800, 800);
 
   cout << "Framebuffer size: " << fb.getWidth() << "x" << fb.getHeight() << endl;
 
-  const string outputPath = filesystem::absolute("output.png").string();
-  fb.clearToGradient(color(1, 0, 0), color(0, 0, 1));
-  fb.exportAsPNG(outputPath);
+  fb.clearToGradient(Color(1, 0, 0), Color(0, 0, 1));
 
-  cout << "Framebuffer exported to " << outputPath << endl;
+  fb.exportAsPNG(fpath("output_gradient.png"));
+  cout << "Gradient exported to " << fpath("output_gradient.png") << endl;
 
-  Camera *cameraPtr = new PerspectiveCamera(vec3(0, 0, 0), vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1), 0.1, fb.getWidth(), fb.getHeight());
 
-  for (int j = 0; j < fb.getHeight(); ++j) {
-    for (int i = 0; i < fb.getWidth(); ++i) {
-      ray r = cameraPtr->generateRay(i, j);
-      // normalize ray direction
-      color clr = r.direction() / r.direction().length();
-      cout << "Color: " << clr.toString() << endl;
-      // shift into color space
-      clr = (clr + vec3(1, 1, 1)) * 0.5;
-      fb.setPixelColor(i, j, color(clr.x(), clr.y(), clr.z()));
+  float viewport_width = 0.1f;
+  while (viewport_width <= 100.0f + 1e-5f) {
+    raytraceImg(fb, 1.0f, viewport_width);
+    string fp = fpath(std::format("rays/anim_rays_{:04.1f}.png", viewport_width));
+    fb.exportAsPNG(fp);
+    cout << "Framebuffer with rays exported to " << fp << endl;
+    viewport_width += step(viewport_width);
+  }
+  // Camera *rayCam = new PerspectiveCamera(fb.getWidth(), fb.getHeight(), 100.0f, 1.0f);
+  // Shader *rayVis = new RayVisualizer();
+
+  // for (int y = 0; y < fb.getHeight(); ++y) {
+  //   for (int x = 0; x < fb.getWidth(); ++x) {
+  //     Ray r = rayCam->generateRay(x, y);
+  //     fb.setPixelColor(x, y, rayVis->getColor(r));
+  //   }
+  // }
+
+  // fb.exportAsPNG(fpath("output_rays.png"));
+  // cout << "Framebuffer with rays exported to " << fpath("output_rays.png") << endl;
+
+  // fb.clear();
+  fb.clearToColor(Color(0, 0, 0, 0));
+
+  Camera *sphereCam = new PerspectiveCamera(fb.getWidth(), fb.getHeight(), 1.0f, 1.0f);
+
+  std::shared_ptr<Shape>
+    s = std::make_shared<Sphere>(Point3(0, 0, -5), 1.0);
+  Shader *sphereShader = new SolidColor(Color(1, 0, 1));
+  for (int y = 0; y < fb.getHeight(); ++y) {
+    for (int x = 0; x < fb.getWidth(); ++x) {
+      Ray r = sphereCam->generateRay(x, y);
+      HitRecord hr = HitRecord();
+
+      if (s->hit(r, 0.001, std::numeric_limits<double>::infinity(), hr)) {
+        fb.setPixelColor(x, y, sphereShader->getColor(r));
+      }
     }
   }
 
-  fb.exportAsPNG("output_with_rays.png");
-  cout << "Framebuffer with rays exported to output_with_rays.png" << endl;
+  fb.exportAsPNG(fpath("output_sphere.png"));
+  cout << "Framebuffer with sphere exported to " << fpath("output_sphere.png") << endl;
+
 
   return 0;
 }
