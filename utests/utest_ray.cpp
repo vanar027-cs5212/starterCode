@@ -12,8 +12,8 @@ TEST_CASE("ray") {
   Point3 newpoint = r.at(t);
 
   // should be origin + t * direction
-  REQUIRE(newpoint.x() == origin.x() + t * dir.x());
-  REQUIRE(newpoint.y() == origin.y() + t * dir.y());
-  REQUIRE(newpoint.z() == origin.z() + t * dir.z());
+  REQUIRE_THAT(newpoint.x(), Catch::Matchers::WithinAbs(origin.x() + t * dir.x(), 1e-6));
+  REQUIRE_THAT(newpoint.y(), Catch::Matchers::WithinAbs(origin.y() + t * dir.y(), 1e-6));
+  REQUIRE_THAT(newpoint.z(), Catch::Matchers::WithinAbs(origin.z() + t * dir.z(), 1e-6));
 }
 

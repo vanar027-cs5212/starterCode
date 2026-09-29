@@ -1,8 +1,8 @@
 #include "Shader.h"
 
-const Color RayVisualizer::getColor(const Ray &r) const {
+const Color NormalShader::getColor(const Vec3 &direction) const {
   // normalize ray direction
-  Color clr = r.direction() / r.direction().length();
+  Color clr = direction.normalized();
 
   // shift into color space
   clr = (clr + Vec3(1, 1, 1)) * 0.5;
@@ -11,4 +11,5 @@ const Color RayVisualizer::getColor(const Ray &r) const {
   return clr;
 };
 
-const Color SolidColor::getColor(const Ray &r) const { return color; };
+const Color SolidColor::getColor(const Vec3 &) const { return color; };
+

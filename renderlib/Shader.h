@@ -7,13 +7,13 @@
 class Shader {
   public:
     Shader() {};
-    virtual const Color getColor(const Ray &r) const = 0;
+    virtual const Color getColor(const Vec3 &) const = 0;
 };
 
-class RayVisualizer : public Shader {
+class NormalShader : public Shader {
   public:
-    RayVisualizer() {};
-    const Color getColor(const Ray &r) const override;
+    NormalShader() {};
+    const Color getColor(const Vec3 &hitNormal) const override;
 };
 
 class SolidColor : public Shader {
@@ -21,7 +21,7 @@ class SolidColor : public Shader {
     SolidColor() {};
     SolidColor(const Color &c) : color(c) {};
 
-    const Color getColor(const Ray &r) const override;
+    const Color getColor(const Vec3 &) const override;
 
   private:
     Color color;

@@ -17,7 +17,10 @@ class Framebuffer {
     void clear();
     void clearToColor(const Color &color);
     void clearToGradient(const Color &gradientStart, const Color &gradientEnd);
-    void clearToTricolor(const Color &c1, const Color &c2, const Color &c3, bool vertical = true);
+    void clearToTricolor(const Color &c1, const Color &c2, const Color &c3, bool vertical = false);
+    void clearToStripes(const std::vector<Color> &colors, bool vertical = false);
+    void clearToStripes(const std::vector<Color> &colors, const std::vector<int> &stripeWidths, bool vertical = false);
+    void clearToRepeatingStripes(const std::vector<Color> &colors, int stripeWidth, bool vertical = false);
 
     void setPixelColor(int x, int y, const Color &c);
     void setPixelColor(int idx, const Color &c);

@@ -17,8 +17,13 @@ Vec3.h
 # target_link_libraries(renderlib PUBLIC ZLIB::ZLIB)
 
 add_executable(main main.cpp)
+add_executable(tmp tmp.cpp)
 
 
 target_link_libraries(main renderlib)
 target_link_libraries(main cs4212-util)
 target_link_libraries(main PNG::PNG)
+
+target_link_libraries(tmp renderlib)
+target_link_libraries(tmp cs4212-util)
+target_link_libraries(tmp PNG::PNG)

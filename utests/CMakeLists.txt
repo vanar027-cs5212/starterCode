@@ -24,6 +24,7 @@ set(UTESTS
   utest_vec3
   utest_color
   utest_ray
+  utest_sphere
   )
 
 # 
@@ -36,6 +37,7 @@ foreach(uexec ${UTESTS})
 	PRIVATE
 	Catch2::Catch2WithMain
 	cs4212-util
+  renderlib
   )
 
   # add_test(NAME ${uexec} COMMAND $<TARGET_FILE:${uexec}>)

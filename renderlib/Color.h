@@ -14,11 +14,19 @@ class Color : public Vec3 {
     Color(const Vec3 &v) : Color(v, 1.0f) {}
 
     Color(float r, float g, float b, float a) : Color(Vec3(r, g, b), a) {}
-    Color(float r, float g, float b) : Color(Vec3(r, g, b), 1.0f) {}
-    Color() : Color(Vec3(0, 0, 0), 1.0f) {}
+    Color(float r, float g, float b) : Color(r, g, b, 1.0f) {}
+    Color(double r, double g, double b, double a) : Color(static_cast<float>(r), static_cast<float>(g), static_cast<float>(b), static_cast<float>(a)) {}
+    Color(double r, double g, double b) : Color(static_cast<float>(r), static_cast<float>(g), static_cast<float>(b), 1.0f) {}
+    Color(int r, int g, int b, float a) : Color(r / 255.0f, g / 255.0f, b / 255.0f, a) {}
+    Color(int r, int g, int b) : Color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f) {}
+    Color() : Color(0, 0, 0, 1.0f) {}
 
 
     float a() const { return alpha; }
+
+    std::string toString() const {
+      return "(" + std::to_string(x()) + ", " + std::to_string(y()) + ", " + std::to_string(z()) + ", " + std::to_string(a()) + ")";
+    }
 
   private:
     float alpha;
