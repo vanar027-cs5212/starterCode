@@ -1,6 +1,6 @@
 #include "Sphere.h"
 
-bool Sphere::hit(const Ray &r, double ray_tmin, double ray_tmax, HitRecord &rec) const {
+bool Sphere::hit(const Ray &r, double ray_tmin, double ray_tmax, HitRecord &hitRecord) const {
   Vec3 oc = center - r.origin();
   auto a = r.direction().length_squared();
   auto h = dot(r.direction(), oc);
@@ -20,9 +20,11 @@ bool Sphere::hit(const Ray &r, double ray_tmin, double ray_tmax, HitRecord &rec)
       return false;
   }
 
-  rec.t = root;
-  rec.p = r.at(rec.t);
-  rec.normal = (rec.p - center) / radius;
+
+  hitRecord.t = root;
+  hitRecord.point = r.at(hitRecord.t);
+  hitRecord.normal = (hitRecord.point - center) / radius;
+  hitRecord.viewDirection = r.direction();
 
   return true;
 }

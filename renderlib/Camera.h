@@ -1,3 +1,6 @@
+#ifndef CAMERA_H
+#define CAMERA_H
+
 #include "Ray.h"
 #include "Framebuffer.h"
 
@@ -79,3 +82,5 @@ class PerspectiveCamera : public Camera {
 
 // Camera *cameraPtr = new PerspectiveCamera();
 // cameraPtr->generateRay(...);
+
+#endif// CAMERA_H

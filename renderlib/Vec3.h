@@ -42,13 +42,6 @@ class Vec3 {
     }
 
 
-    Vec3 &cross(const Vec3 &v) {
-      this->e[0] = e[1] * v.e[2] - e[2] * v.e[1];
-      this->e[1] = e[2] * v.e[0] - e[0] * v.e[2];
-      this->e[2] = e[0] * v.e[1] - e[1] * v.e[0];
-      return *this;
-    }
-
     Vec3 normalized() const {
       return Vec3(e[0] / length(), e[1] / length(), e[2] / length());
     }
