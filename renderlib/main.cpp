@@ -1,10 +1,14 @@
 #include <filesystem>
+#include <format>
 #include "Framebuffer.h"
 #include "Camera.h"
 #include "Sphere.h"
 #include "Shader.h"
 #include "Scene.h"
 #include "Triangle.h"
+#include "SolidShader.h"
+#include "NormalShader.h"
+#include "LambertianShader.h"
 
 
 using namespace std;
@@ -59,7 +63,9 @@ void visualizeRay(Framebuffer &fb, float focal_length, float viewport_width) {
   for (int y = 0; y < fb.getHeight(); ++y) {
     for (int x = 0; x < fb.getWidth(); ++x) {
       Ray r = rayCam->generateRay(x, y);
-      fb.setPixelColor(x, y, rayVis->getColor(r.direction()));
+      HitRecord hr;
+      hr.normal = r.direction();
+      fb.setPixelColor(x, y, rayVis->getColor(hr));
     }
   }
 }
@@ -69,14 +75,14 @@ void drawSphere(Framebuffer &fb) {
 
   std::shared_ptr<Shape>
     s = std::make_shared<Sphere>(Point3(0, 0, -5), 1.0);
-  Shader *sphereShader = new SolidColor(Color(1, 0, 1));
+  Shader *sphereShader = new SolidShader(Color(1, 0, 1));
   for (int y = 0; y < fb.getHeight(); ++y) {
     for (int x = 0; x < fb.getWidth(); ++x) {
       Ray r = sphereCam->generateRay(x, y);
       HitRecord hr = HitRecord();
 
       if (s->hit(r, 0.001, std::numeric_limits<double>::infinity(), hr)) {
-        fb.setPixelColor(x, y, sphereShader->getColor(r.direction()));
+        fb.setPixelColor(x, y, sphereShader->getColor(hr));
       }
     }
   }
@@ -91,17 +97,17 @@ void drawOverlappingSpheres(Framebuffer &fb, const Color &innerClr, const Color 
   fb.clearToColor(innerClr);
   Sphere *outerSphere = new Sphere(Point3(0, 0, -5), 1.7);
   Sphere *innerSphere = new Sphere(Point3(0, 0, -5), 1.3);
-  Shader *outerShader = new SolidColor(Color(outerClr));
-  Shader *innerShader = new SolidColor(Color(innerClr));
+  Shader *outerShader = new SolidShader(Color(outerClr));
+  Shader *innerShader = new SolidShader(Color(innerClr));
   for (int y = 0; y < fb.getHeight(); ++y) {
     for (int x = 0; x < fb.getWidth(); ++x) {
       Ray r = sphereCam->generateRay(x, y);
       HitRecord hr = HitRecord();
 
       if (innerSphere->hit(r, 0.001, std::numeric_limits<double>::infinity(), hr))
-        fb.setPixelColor(x, y, innerShader->getColor(r.direction()));
+        fb.setPixelColor(x, y, innerShader->getColor(hr));
       else if (outerSphere->hit(r, 0.001, std::numeric_limits<double>::infinity(), hr))
-        fb.setPixelColor(x, y, outerShader->getColor(r.direction()));
+        fb.setPixelColor(x, y, outerShader->getColor(hr));
     }
   }
   fb.exportAsPNG(fpath("output_sphere_overlap.png"));
@@ -121,14 +127,14 @@ void drawStripes(Framebuffer &fb) {
 void drawFlag(Framebuffer &fb) {
   Camera *cam = new PerspectiveCamera(fb.getWidth(), fb.getHeight(), 1.0f, 1.0f);
   Sphere *flagSphere = new Sphere(Point3(0, 0, -7), 1.0);
-  Shader *flagShader = new SolidColor(Color(1.f, 1.f, 1.f));
+  Shader *flagShader = new SolidShader(Color(1.f, 1.f, 1.f));
   for (int y = 0; y < fb.getHeight(); ++y) {
     for (int x = 0; x < fb.getWidth(); ++x) {
       Ray r = cam->generateRay(x, y);
       HitRecord hr = HitRecord();
 
       if (flagSphere->hit(r, 0.001, std::numeric_limits<double>::infinity(), hr)) {
-        fb.setPixelColor(x, y, flagShader->getColor(r.direction()));
+        fb.setPixelColor(x, y, flagShader->getColor(hr));
       }
     }
   }
@@ -144,16 +150,13 @@ void drawScene(Framebuffer &fb) {
                       .addShape(std::make_shared<Sphere>(Point3(1, 0, -5), 0.75))
                       .addShape(std::make_shared<Sphere>(Point3(-2, 0, -5), 0.75))
                       .addShape(std::make_shared<Triangle>(Point3(-1, -1, -4), Point3(1, -1, -4), Point3(0, 1, -4)));
-  NormalShader sh;
+
   for (int y = 0; y < fb.getHeight(); ++y) {
     for (int x = 0; x < fb.getWidth(); ++x) {
       Ray r = cam->generateRay(x, y);
-      HitRecord hr = HitRecord();
-
-      if (testScene.hit(r, 0.001, std::numeric_limits<double>::infinity(), hr)) {
-        Color c = sh.getColor(hr.normal);
-        fb.setPixelColor(x, y, c);
-      }
+      printf("Ray origin: %s, direction: %s\n", r.origin().toString().c_str(), r.direction().toString().c_str());
+      Color c = testScene.computeRayColor(r, 0);
+      fb.setPixelColor(x, y, c);
     }
   }
   fb.exportAsPNG(fpath("output_scene.png"));

@@ -4,7 +4,7 @@
 
 // ⃗p(α, β, γ) = α⃗a + β⃗b + γ⃗c
 
-bool Triangle::hit(const Ray &r, double ray_tmin, double ray_tmax, HitRecord &rec) const {
+bool Triangle::hit(const Ray &r, double ray_tmin, double ray_tmax, HitRecord &hitRecord) const {
   // Using the Möller–Trumbore intersection algorithm
   // Set up all the necessary variables
   float _a = a.x() - b.x(),
@@ -47,9 +47,9 @@ bool Triangle::hit(const Ray &r, double ray_tmin, double ray_tmax, HitRecord &re
     return false;
 
   // Set the hit record
-  rec.t = t;
-  rec.p = r.at(t);
-  rec.normal = (b - a).cross(c - a).normalized();
+  hitRecord.point = r.at(t);
+  hitRecord.normal = cross((b - a), (c - a)).normalized();
+  hitRecord.t = t;
 
   return true;
 }

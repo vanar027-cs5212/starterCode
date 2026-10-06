@@ -1,16 +1,21 @@
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
+
 add_library(renderlib
-Camera.cpp Camera.h
+Camera.h Camera.cpp
 Color.h
-Framebuffer.cpp Framebuffer.h
+Framebuffer.h Framebuffer.cpp
+PointLight.h
 Ray.h
-Scene.h
-Shader.cpp Shader.h
-Shape.h
-Sphere.cpp Sphere.h
-Triangle.cpp Triangle.h
+Scene.h Scene.cpp
 Vec3.h
+Shader.h
+SolidShader.h
+LambertianShader.h
+BlinnPhongShader.h
+Shape.h
+Sphere.h Sphere.cpp
+Triangle.h Triangle.cpp
 )
 
 # target_link_libraries(renderlib PUBLIC PNG::PNG)

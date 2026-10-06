@@ -8,7 +8,7 @@ class Sphere : public Shape {
     Sphere() {}
     Sphere(const Point3 &center, double radius) : center(center), radius(radius) {};
 
-    bool hit(const Ray &r, double ray_tmin, double ray_tmax, HitRecord &rec) const override;
+    bool hit(const Ray &r, double ray_tmin, double ray_tmax, HitRecord &hitRecord) const override;
 
   public:
     Point3 center;

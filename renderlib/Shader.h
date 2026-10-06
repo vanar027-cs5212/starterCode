@@ -1,28 +1,13 @@
-#include <memory>
+#ifndef SHADER_H
+#define SHADER_H
 
-#include "Ray.h"
 #include "Color.h"
 #include "Shape.h"
-
+struct HitRecord;
 class Shader {
   public:
     Shader() {};
-    virtual const Color getColor(const Vec3 &) const = 0;
+    virtual const Color getColor(const HitRecord &hitRecord) const = 0;
 };
 
-class NormalShader : public Shader {
-  public:
-    NormalShader() {};
-    const Color getColor(const Vec3 &hitNormal) const override;
-};
-
-class SolidColor : public Shader {
-  public:
-    SolidColor() {};
-    SolidColor(const Color &c) : color(c) {};
-
-    const Color getColor(const Vec3 &) const override;
-
-  private:
-    Color color;
-};
+#endif// SHADER_H
