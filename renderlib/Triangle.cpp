@@ -50,6 +50,7 @@ bool Triangle::hit(const Ray &r, double ray_tmin, double ray_tmax, HitRecord &hi
   hitRecord.point = r.at(t);
   hitRecord.normal = cross((b - a), (c - a)).normalized();
   hitRecord.t = t;
+  hitRecord.viewDirection = r.direction();
 
   return true;
 }

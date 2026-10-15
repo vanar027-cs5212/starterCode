@@ -1,5 +1,6 @@
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
+find_package(OpenMP)
 
 add_library(renderlib
 Camera.h Camera.cpp
@@ -28,6 +29,9 @@ add_executable(tmp tmp.cpp)
 target_link_libraries(main renderlib)
 target_link_libraries(main cs4212-util)
 target_link_libraries(main PNG::PNG)
+if (OpenMP_CXX_FOUND)
+  target_link_libraries(renderlib PRIVATE OpenMP::OpenMP_CXX)
+endif()
 
 target_link_libraries(tmp renderlib)
 target_link_libraries(tmp cs4212-util)

@@ -27,9 +27,14 @@ class Shape {
     // On a hit, fills in hitRecord record with the closest such intersection.
     virtual bool hit(const Ray &r, double t_min, double t_max, HitRecord &hitRecord) const = 0;
 
+    void setShader(std::shared_ptr<Shader> shader) {
+      this->shader = shader;
+    }
+
     std::shared_ptr<Shader> getShader() const { return shader; }
 
   protected:
+    Shape(std::shared_ptr<Shader> shader) : shader(shader) {}
     std::shared_ptr<Shader> shader = nullptr;
 };
 

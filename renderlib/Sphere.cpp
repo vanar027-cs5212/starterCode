@@ -23,6 +23,7 @@ bool Sphere::hit(const Ray &r, double ray_tmin, double ray_tmax, HitRecord &hitR
   hitRecord.point = r.at(hitRecord.t);
   hitRecord.normal = (hitRecord.point - center) / radius;
   hitRecord.t = root;
+  hitRecord.viewDirection = r.direction();
 
   return true;
 }

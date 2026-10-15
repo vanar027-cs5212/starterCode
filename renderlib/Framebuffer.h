@@ -1,5 +1,5 @@
 #ifndef FRAMEBUFFER_H
-#define FRAMEBUFFER_H 1
+#define FRAMEBUFFER_H
 
 #include <vector>
 #include "Color.h"
