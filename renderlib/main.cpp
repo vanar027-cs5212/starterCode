@@ -24,7 +24,7 @@ void drawStripes(Framebuffer &fb);
 void drawFlag(Framebuffer &fb);
 void drawScene(Framebuffer &fb);
 void zach();
-void aaa();
+void drawLandBPShaders();
 
 int main(int argc, char **argv) {
   auto fb = Framebuffer(200, 200);
@@ -43,8 +43,7 @@ int main(int argc, char **argv) {
 
   // drawScene(fb);
 
-  // zach();
-  aaa();
+  drawLandBPShaders();
 
   return 0;
 }
@@ -179,56 +178,40 @@ void drawScene(Framebuffer &fb) {
   cout << "Framebuffer with scene exported to " << fpath("output_scene.png") << endl;
 }
 
-void zach() {
-  Framebuffer fb(2000, 2000);
-  // Vec3 viewdir(0, -.3, 1);
-  // Point3 origin(0, 2, 1);
-  double ipw = 1, fl = 1;
-  // auto p = PerspectiveCamera(origin, Vec3(1, 0, 0), Vec3(0, 1, 0), viewdir, fb.getWidth(), fb.getHeight(), ipw, fl);
-  auto p = PerspectiveCamera(fb.getWidth(), fb.getHeight(), ipw, fl);
-
-  Color sphereClr(0.f, .8f, .8f);
-  auto matte = make_shared<LambertianShader>(sphereClr);
-  auto satin = make_shared<BlinnPhongShader>(sphereClr, Color(.6f, .6f, .6f), 16);
-  auto glossy = make_shared<BlinnPhongShader>(sphereClr, 200);
-
-  auto floorShader = make_shared<LambertianShader>(Color(.5f, .5f, .5f));
-
-  auto warmLight = PointLight(Point3(4, 4, 0), Color(1.f, .85f, .7f));
-  auto coolLight = PointLight(Point3(-4, 2, -1), Color(.4f, .6f, 1.f));
-
-  Scene *scene = new Scene();
-  scene
-    // .addLight(warmLight)
-    //   .addLight(coolLight)
-    // .addShape(make_shared<Sphere>(Point3(0, -100.5, -5), 100, floorShader))
-    // .addShape(make_shared<Sphere>(Point3(-1.2, 0, -4), 0.5, matte))
-    // .addShape(make_shared<Sphere>(Point3(0, 0, -4), 0.5, satin))
-    // .addShape(make_shared<Sphere>(Point3(1.2, 0, -4), 0.5, glossy));
-
-    ->addShape(make_shared<Sphere>(Point3(0, -100.5, -5), 100))
-    ->addShape(make_shared<Sphere>(Point3(-1.2, 0, -4), 5))
-    ->addShape(make_shared<Sphere>(Point3(0, 0, -4), 5))
-    ->addShape(make_shared<Sphere>(Point3(1.2, 0, -4), 5));
-
-  scene->render(fb, p, 0);
-
-  fb.exportAsPNG(fpath("output_zach.png"));
-  printf("Framebuffer with zach scene exported to %s\n", fpath("output_zach.png").c_str());
-}
-
-void aaa() {
+void drawLandBPShaders() {
   Framebuffer fb(2000, 2000);
   auto p = PerspectiveCamera(fb.getWidth(), fb.getHeight(), 1.0f, 1.0f);
   Scene *scene = new Scene();
   scene
-    ->addLight(PointLight(Point3(0, -50, 10), Color(1.f, 1.f, 1.f)))
-    ->addLight(PointLight(Point3(0, 100, -10), Color(.5f, .5f, .5f)))
-    ->addLight(PointLight(Point3(1000, 1000, 1000), Color(.2f, .2f, .2f)))
-    ->addShape(make_shared<Sphere>(Point3(-2, 0, -10), 1.5, make_shared<LambertianShader>(Color(1.f, 0.f, 0.f))))
-    ->addShape(make_shared<Sphere>(Point3(2, 0, -10), 1.5, make_shared<BlinnPhongShader>(Color(0.f, 1.f, 0.f), Color(1.f, 1.f, 1.f), 16)));
+    ->addLight(PointLight(Point3(10, -10, 10), Color(.8f, .8f, .8f)))
+    ->addShape(make_shared<Sphere>(Point3(-3, -3, -10), 1.5, make_shared<LambertianShader>(Color(1.f, 0.f, 0.f))))
+    ->addShape(make_shared<Sphere>(Point3(0, -3, -10), 1.5, make_shared<LambertianShader>(Color(0.f, 1.f, 0.f))))
+    ->addShape(make_shared<Sphere>(Point3(3, -3, -10), 1.5, make_shared<LambertianShader>(Color(0.f, 0.f, 1.f))))
+    ->addShape(make_shared<Sphere>(Point3(-3, 0, -10), 1.5, make_shared<LambertianShader>(Color(1.f, 1.f, 0.f))))
+    ->addShape(make_shared<Sphere>(Point3(0, 0, -10), 1.5, make_shared<LambertianShader>(Color(1.f, 0.f, 1.f))))
+    ->addShape(make_shared<Sphere>(Point3(3, 0, -10), 1.5, make_shared<LambertianShader>(Color(0.f, 1.f, 1.f))))
+    ->addShape(make_shared<Sphere>(Point3(-3, 3, -10), 1.5, make_shared<LambertianShader>(Color(1.f, 0.5f, 0.f))))
+    ->addShape(make_shared<Sphere>(Point3(0, 3, -10), 1.5, make_shared<LambertianShader>(Color(0.5f, 0.f, 1.f))))
+    ->addShape(make_shared<Sphere>(Point3(3, 3, -10), 1.5, make_shared<LambertianShader>(Color(0.f, 0.5f, 1.f))));
+
   printf("Created scene with %zu shapes and %zu lights\n", scene->getShapeList().size(), scene->getLightList().size());
   scene->render(fb, p, 0);
-  fb.exportAsPNG(fpath("output_aaa.png"));
-  printf("Framebuffer with aaa scene exported to %s\n", fpath("output_aaa.png").c_str());
+  fb.exportAsPNG(fpath("output_lambertian_9.png"));
+  printf("Framebuffer with lambertian scene exported to %s\n", fpath("output_lambertian_9.png").c_str());
+
+  Scene *scene2 = new Scene();
+  scene2
+    ->addLight(PointLight(Point3(10, -10, 10), Color(.8f, .8f, .8f)))
+    ->addShape(make_shared<Sphere>(Point3(-3, -3, -10), 1.5, make_shared<BlinnPhongShader>(Color(1.f, 0.f, 0.f), Color(0.f, 1.f, 1.f), 2)))
+    ->addShape(make_shared<Sphere>(Point3(0, -3, -10), 1.5, make_shared<BlinnPhongShader>(Color(0.f, 1.f, 0.f), Color(1.f, 0.f, 1.f), 4)))
+    ->addShape(make_shared<Sphere>(Point3(3, -3, -10), 1.5, make_shared<BlinnPhongShader>(Color(0.f, 0.f, 1.f), Color(1.f, 1.f, 0.f), 8)))
+    ->addShape(make_shared<Sphere>(Point3(-3, 0, -10), 1.5, make_shared<BlinnPhongShader>(Color(1.f, 1.f, 0.f), Color(0.f, 0.f, 1.f), 16)))
+    ->addShape(make_shared<Sphere>(Point3(0, 0, -10), 1.5, make_shared<BlinnPhongShader>(Color(1.f, 0.f, 1.f), Color(0.f, 1.f, 0.f), 32)))
+    ->addShape(make_shared<Sphere>(Point3(3, 0, -10), 1.5, make_shared<BlinnPhongShader>(Color(0.f, 1.f, 1.f), Color(1.f, 0.f, 0.f), 64)))
+    ->addShape(make_shared<Sphere>(Point3(-3, 3, -10), 1.5, make_shared<BlinnPhongShader>(Color(1.f, 0.5f, 0.f), Color(0.f, 0.5f, 1.f), 128)))
+    ->addShape(make_shared<Sphere>(Point3(0, 3, -10), 1.5, make_shared<BlinnPhongShader>(Color(0.5f, 0.f, 1.f), Color(1.f, 0.5f, 0.f), 256)))
+    ->addShape(make_shared<Sphere>(Point3(3, 3, -10), 1.5, make_shared<BlinnPhongShader>(Color(0.f, 0.5f, 1.f), Color(0.5f, 1.f, 0.f), 512)));
+  scene2->render(fb, p, 0);
+  fb.exportAsPNG(fpath("output_blinnphong_9.png"));
+  printf("Framebuffer with blinn-phong scene exported to %s\n", fpath("output_blinnphong_9.png").c_str());
 }
