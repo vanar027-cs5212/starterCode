@@ -179,10 +179,11 @@ void drawScene(Framebuffer &fb) {
 }
 
 void drawLandBPShaders() {
-  Framebuffer fb(2000, 2000);
-  auto p = PerspectiveCamera(fb.getWidth(), fb.getHeight(), 1.0f, 1.0f);
+  Framebuffer fb(200, 200);
+  Camera *p = new PerspectiveCamera(fb.getWidth(), fb.getHeight(), 1.0f, 1.0f);
   Scene *scene = new Scene();
   scene
+    ->setAntialiasSampleCount(16)
     ->addLight(PointLight(Point3(10, -10, 10), Color(.8f, .8f, .8f)))
     ->addShape(make_shared<Sphere>(Point3(-3, -3, -10), 1.5, make_shared<LambertianShader>(Color(1.f, 0.f, 0.f))))
     ->addShape(make_shared<Sphere>(Point3(0, -3, -10), 1.5, make_shared<LambertianShader>(Color(0.f, 1.f, 0.f))))
