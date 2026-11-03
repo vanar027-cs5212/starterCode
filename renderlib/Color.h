@@ -4,6 +4,7 @@
 #include "Vec3.h"
 #include <iostream>
 
+
 class Color : public Vec3 {
   public:
     // Inherit assignment operators from Vec3
@@ -26,6 +27,11 @@ class Color : public Vec3 {
 
     std::string toString() const {
       return "(" + std::to_string(x()) + ", " + std::to_string(y()) + ", " + std::to_string(z()) + ", " + std::to_string(a()) + ")";
+    }
+
+    static Color random(double alpha = 1.0) {
+      auto randfloat = []() { return static_cast<double>(rand()) / RAND_MAX; };
+      return Color(randfloat(), randfloat(), randfloat(), alpha);
     }
 
   private:

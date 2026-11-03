@@ -7,7 +7,10 @@ class SolidShader : public Shader {
     SolidShader() {};
     SolidShader(const Color &c) : color(c) {};
 
-    const Color getColor(const HitRecord &) const override { return color; };
+    const Color getColor(const HitRecord &) const override {
+      // std::cout << "Getting solid color: " << color.toString() << std::endl;
+      return color;
+    };
 
 
   private:

@@ -53,7 +53,7 @@ bool Scene::hit(const Ray &r, double t_min, double t_max, HitRecord &hitRecord) 
   return _hit;
 }
 
-Color Scene::computeRayColor(const Ray &r, int depth = 1) const {
+Color Scene::computeRayColor(const Ray &r, int depth) const {
   if (depth <= 0) {
     return bgColor;
   }
@@ -86,23 +86,26 @@ float randomOffset() {
   return distribution(generator);
 }
 
-void Scene::render(Framebuffer &fb, Camera *cam, int maxDepth = 1) const {
+void Scene::render(Framebuffer &fb, Camera *cam, int maxDepth) const {
 #pragma omp parallel for
   for (int y = 0; y < fb.getHeight(); ++y) {
     for (int x = 0; x < fb.getWidth(); ++x) {
       Color c(0.f, 0.f, 0.f);
-      for (int p = 0; p < antialias_sample_count; ++p) {
-        for (int q = 0; q < antialias_sample_count; ++q) {
+      if (antialias_sample_count <= 1) {
+        Ray r = cam->generateRay(x + 0.5f, y + 0.5f);
+        c = computeRayColor(r, 1);
+      } else {
+        for (int p = 0; p < antialias_sample_count; ++p) {
+          for (int q = 0; q < antialias_sample_count; ++q) {
 
-          float pOffset = (p + randomOffset()) / antialias_sample_count;
-          float qOffset = (q + randomOffset()) / antialias_sample_count;
-
-          Ray r = cam->generateRay(x + pOffset, y + qOffset);
-          c += computeRayColor(r, 0);
+            float pOffset = (p + randomOffset()) / antialias_sample_count;
+            float qOffset = (q + randomOffset()) / antialias_sample_count;
+            Ray r = cam->generateRay(x + pOffset, y + qOffset);
+            c += computeRayColor(r, 1);
+          }
         }
+        c /= (antialias_sample_count * antialias_sample_count);
       }
-      c /= (antialias_sample_count * antialias_sample_count);
-
       // printf("Color: %f, %f, %f\n", c.x(), c.y(), c.z());
       fb.setPixelColor(x, y, c);
     }
