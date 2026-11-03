@@ -5,12 +5,12 @@
 class NormalShader : public Shader {
   public:
     NormalShader() {};
-    const Color getColor(const HitRecord &hitRecord) const override { return getColor(hitRecord.viewDirection); };
+    const Color getColor(const HitRecord &hitRecord) const override { return getColor(hitRecord.normal); };
 
-    const Color getColor(const Vec3 &viewDirection) const {
+    const Color getColor(const Vec3 &normal) const {
       // normalize ray direction
-      Color clr = viewDirection.normalized();
-      // printf("NormalShader::getColor: viewDirection: %s\n", viewDirection.toString().c_str());
+      Color clr = normal.normalized();
+      // printf("NormalShader::getColor: normal: %s\n", normal.toString().c_str());
 
       // shift into color space
       clr = (clr + Vec3(1.f, 1.f, 1.f)) * 0.5;

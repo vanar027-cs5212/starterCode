@@ -2,6 +2,8 @@
 #define COLOR_H
 
 #include "Vec3.h"
+#include <cstdlib>
+#include <ctime>
 #include <iostream>
 
 

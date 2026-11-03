@@ -60,16 +60,17 @@ int main(int argc, char *argv[]) {
       allFloats[i + 6],
       allFloats[i + 7],
       allFloats[i + 8]);*/
+    // srand(static_cast<unsigned int>(std::time(nullptr)));
+
     scene->addShape(make_shared<Triangle>(
       Point3(allFloats[i], allFloats[i + 1], allFloats[i + 2]),
       Point3(allFloats[i + 3], allFloats[i + 4], allFloats[i + 5]),
-      Point3(allFloats[i + 6], allFloats[i + 7], allFloats[i + 8])
-      // make_shared<SolidShader>(Color::random())));
-      ));
+      Point3(allFloats[i + 6], allFloats[i + 7], allFloats[i + 8]),
+      make_shared<SolidShader>(Color::random())));
   }
 
-  Framebuffer fb(800, 800);
-  PerspectiveCamera *cam = new PerspectiveCamera(fb.getWidth(), (float)fb.getHeight());
+  Framebuffer fb(600, 600);
+  PerspectiveCamera *cam = new PerspectiveCamera(Vec3(0, 0, 3), Vec3(1, 0, 0), Vec3(0, -1, 0), Vec3(0, 0, 1), fb.getWidth(), fb.getHeight(), 1.0f, 1.0f);
   cout << "rendering scene" << endl;
   scene->render(fb, cam, 1);
   fb.exportAsPNG(fpath("triangleChallenge.png"));
