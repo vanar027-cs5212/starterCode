@@ -41,8 +41,12 @@ int main(int argc, char *argv[]) {
   int numTriangles = numVertices / 3;
   std::cout << "Interpreted as Triangles: " << numTriangles << std::endl;
 
-  Scene *scene = new Scene();
-  scene
+  Scene *solidScene = new Scene();
+  Scene *normalScene = new Scene();
+  solidScene
+    ->setAntialiasSampleCount(1)
+    ->addLight(PointLight(Point3(0, 0, 0), Color(1, 1, 1)));
+  normalScene
     ->setAntialiasSampleCount(1)
     ->addLight(PointLight(Point3(0, 0, 0), Color(1, 1, 1)));
   for (int i = 0; i < allFloats.size(); i += 9) {
@@ -62,17 +66,23 @@ int main(int argc, char *argv[]) {
       allFloats[i + 8]);*/
     // srand(static_cast<unsigned int>(std::time(nullptr)));
 
-    scene->addShape(make_shared<Triangle>(
-      Point3(allFloats[i], allFloats[i + 1], allFloats[i + 2]),
-      Point3(allFloats[i + 3], allFloats[i + 4], allFloats[i + 5]),
-      Point3(allFloats[i + 6], allFloats[i + 7], allFloats[i + 8]),
-      make_shared<SolidShader>(Color::random())));
+    auto a = Point3(allFloats[i], allFloats[i + 1], allFloats[i + 2]),
+         b = Point3(allFloats[i + 3], allFloats[i + 4], allFloats[i + 5]),
+         c = Point3(allFloats[i + 6], allFloats[i + 7], allFloats[i + 8]);
+    solidScene->addShape(make_shared<Triangle>(a, b, c, make_shared<SolidShader>(Color::random())));
+    normalScene->addShape(make_shared<Triangle>(a, b, c));
   }
 
-  Framebuffer fb(600, 600);
+  Framebuffer fb(1080, 1080);
   PerspectiveCamera *cam = new PerspectiveCamera(Vec3(0, 0, 3), Vec3(1, 0, 0), Vec3(0, -1, 0), Vec3(0, 0, 1), fb.getWidth(), fb.getHeight(), 1.0f, 1.0f);
-  cout << "rendering scene" << endl;
-  scene->render(fb, cam, 1);
-  fb.exportAsPNG(fpath("triangleChallenge.png"));
-  cout << "Framebuffer with triangle challenge scene exported to " << fpath("triangleChallenge.png") << endl;
+
+  std::cout << "rendering solidScene" << endl;
+  solidScene->render(fb, cam, 1);
+  fb.exportAsPNG(fpath("solidTriangleChallenge.png"));
+  std::cout << "Framebuffer with triangle challenge scene exported to " << fpath("solidTriangleChallenge.png") << endl;
+
+  std::cout << "rendering normalScene" << endl;
+  normalScene->render(fb, cam, 1);
+  fb.exportAsPNG(fpath("normalTriangleChallenge.png"));
+  std::cout << "Framebuffer with triangle challenge scene exported to " << fpath("normalTriangleChallenge.png") << endl;
 }
