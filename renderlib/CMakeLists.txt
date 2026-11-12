@@ -26,7 +26,8 @@ add_executable(main main.cpp)
 add_executable(tmp tmp.cpp)
 add_executable(triangleChallenge triangleChallenge.cpp)
 
-add_custom_command(TARGET triangleChallenge POST_BUILD
+add_custom_command(
+  TARGET triangleChallenge POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
           ${CMAKE_CURRENT_SOURCE_DIR}/trilist.dat
           $<TARGET_FILE_DIR:triangleChallenge>/trilist.dat

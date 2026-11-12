@@ -14,8 +14,18 @@
 
 int CheckGLErrors(const char *s) {
   int errCount = 0;
+  GLenum err;
+  while ((err = glGetError()) != GL_NO_ERROR) {
+    std::cerr << "OpenGL Error (" << s << "): 0x" << std::hex << err << std::dec << std::endl;
+    errCount++;
+  }
   return errCount;
 }
+
+struct vertexData {
+    glm::vec3 pos;
+    glm::vec3 color;
+};
 
 int main(void) {
   /* Initialize the library */
@@ -31,11 +41,11 @@ int main(void) {
 
   /* Create a windowed mode window and its OpenGL context */
   int winWidth = 1000;
-  float aspectRatio = 1.0; // 16.0 / 9.0; // winWidth / (float)winHeight;
+  float aspectRatio = 1.0;// 16.0 / 9.0; // winWidth / (float)winHeight;
   int winHeight = winWidth / aspectRatio;
 
   GLFWwindow *window =
-      glfwCreateWindow(winWidth, winHeight, "GLFW Example", NULL, NULL);
+    glfwCreateWindow(winWidth, winHeight, "GLFW Example", NULL, NULL);
   if (!window) {
     std::cerr << "GLFW did not create a window!" << std::endl;
 
@@ -73,7 +83,7 @@ int main(void) {
   float halfWidth = 15.0 / 2.0;
   float halfHeight = halfWidth / aspectRatio;
   glm::mat4 projectionMatrix =
-      glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, -10.0f, 10.0f);
+    glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, -10.0f, 10.0f);
 
   GLint major_version;
   glGetIntegerv(GL_MAJOR_VERSION, &major_version);
@@ -87,20 +97,45 @@ int main(void) {
 
   // this is the actual triangle data that will be copied to
   // the GPU memory
-  std::vector<float> host_VertexBuffer{-0.5f, -0.5f, 0.0f,  // V0
-                                       0.5f,  -0.5f, 0.0f,  // V1
-                                       0.0f,  0.5f,  0.0f}; // V2
+  /* std::vector<vertexData> modelData{
+     {
+       glm::vec3(-3.0f, -3.0f, 0.0f),// V0
+       glm::vec3(0.1529f, 0.9608f, 0.5569f)// V0 color (#27F58E)
+     },
+     {
+       glm::vec3(3.0f, -3.0f, 0.0f),// V1
+       glm::vec3(0.5569f, 0.1529f, 0.9608f)// V1 color (#8E27F5)
+     },
+     {
+       glm::vec3(0.0f, 3.0f, 0.0f),// V2
+       glm::vec3(0.9608f, 0.5569f, 0.1529f)// V2 color (#F58E27)
+     }
+   };*/
 
-  int numBytes = host_VertexBuffer.size() * sizeof(float);
+  std::vector<vertexData> modelData{
+    {
+      glm::vec3(-3.0f, -3.0f, 0.0f),// V0
+      glm::vec3(0.717647f, 0.368627f, 1.f)// V0 color (#B75EFF)
+    },
+    {
+      glm::vec3(3.0f, -3.0f, 0.0f),// V1
+      glm::vec3(1.0f, 0.717647f, 0.368627f)// V1 color (#FFB75E)
+    },
+    {
+      glm::vec3(0.0f, 3.0f, 0.0f),// V2
+      glm::vec3(0.368627f, 0.717647f, 1.0f)// V2 color (#5EB7FF)
+    }
+  };
 
-  // copy the numBytes from host_VertexBuffer t the GPU and store in
+  int numBytes = modelData.size() * sizeof(vertexData);
+
+  // copy the numBytes from modelData t the GPU and store in
   // the currently bound VBO
-  glBufferData(GL_ARRAY_BUFFER, numBytes, host_VertexBuffer.data(),
-               GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, numBytes, modelData.data(), GL_STATIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   // once copied, we no longer need the data on the host
-  host_VertexBuffer.clear();
+  modelData.clear();
   /* MAKE TRIANGLE VAO */
   GLuint m_VAO;
   // create a vertex array object that will map the attributes in
@@ -109,23 +144,28 @@ int main(void) {
   glGenVertexArrays(1, &m_VAO);
   glBindVertexArray(m_VAO);
 
-  // VAO details here - we only have 1 attribute or location
-  // (Position of the vertex)
-  glEnableVertexAttribArray(0);
+  // VAO details here - we now have 2 attributes
   glBindBuffer(GL_ARRAY_BUFFER, m_triangleVBO[0]);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+  // attr 0: Position of the vertex
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+  // attr 1: Color of the vertex
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (const GLvoid *)12);
+  // bind
   glBindVertexArray(0);
 
   /* CREATE SHADERS*/
   // Create a shader using my GLSLObject class
   sivelab::GLSLObject shader;
-  shader.addShader("vertexShader_passthrough.glsl",
-                   sivelab::GLSLObject::VERTEX_SHADER);
-  shader.addShader("fragmentShader_passthrough.glsl",
-                   sivelab::GLSLObject::FRAGMENT_SHADER);
-  shader.createProgram();
+  shader.addShader("shaders/vertexShader_passthrough.glsl",
+    sivelab::GLSLObject::VERTEX_SHADER);
+  shader.addShader("shaders/fragmentShader_barycentricInterpolation.glsl",
+    sivelab::GLSLObject::FRAGMENT_SHADER);
+  GLuint shaderProgram = shader.createProgram();
 
-  double timeDiff = 0.0, startFrameTime = 0.0, endFrameTime = 0.0;
+  double timeDiff = 0.0,
+         startFrameTime = 0.0, endFrameTime = 0.0;
 
   /* Loop until the user closes the window */
   while (!glfwWindowShouldClose(window)) {
@@ -139,6 +179,7 @@ int main(void) {
 
     /* Render your objects here */
     shader.activate();
+    glUniformMatrix4fv(shader.createUniform("projMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
