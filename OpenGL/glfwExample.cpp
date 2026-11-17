@@ -82,6 +82,12 @@ int main(void) {
   // The ortho parameters, in order: left, right, bottom, top, zNear, zFar
   float halfWidth = 15.0 / 2.0;
   float halfHeight = halfWidth / aspectRatio;
+  float left = -halfWidth;
+  float right = halfWidth;
+  float bottom = -halfHeight;
+  float top = halfHeight;
+  float near = 5.0f;
+  float far = -5.0f;
   glm::mat4 projectionMatrix =
     glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, -10.0f, 10.0f);
 
@@ -97,20 +103,20 @@ int main(void) {
 
   // this is the actual triangle data that will be copied to
   // the GPU memory
-  /* std::vector<vertexData> modelData{
-     {
-       glm::vec3(-3.0f, -3.0f, 0.0f),// V0
-       glm::vec3(0.1529f, 0.9608f, 0.5569f)// V0 color (#27F58E)
-     },
-     {
-       glm::vec3(3.0f, -3.0f, 0.0f),// V1
-       glm::vec3(0.5569f, 0.1529f, 0.9608f)// V1 color (#8E27F5)
-     },
-     {
-       glm::vec3(0.0f, 3.0f, 0.0f),// V2
-       glm::vec3(0.9608f, 0.5569f, 0.1529f)// V2 color (#F58E27)
-     }
-   };*/
+  std::vector<vertexData> noProjectData{ // data that doesn't need projection to appear trianglish (for passthrough)
+    {
+      glm::vec3(-0.5f, -0.5f, 0.0f),// V0
+      glm::vec3(0.1529f, 0.9608f, 0.5569f)// V0 color (#27F58E)
+    },
+    {
+      glm::vec3(0.5f, -0.5f, 0.0f),// V1
+      glm::vec3(0.5569f, 0.1529f, 0.9608f)// V1 color (#8E27F5)
+    },
+    {
+      glm::vec3(0.0f, 0.5f, 0.0f),// V2
+      glm::vec3(0.9608f, 0.5569f, 0.1529f)// V2 color (#F58E27)
+    }
+  };
 
   std::vector<vertexData> modelData{
     {
@@ -158,11 +164,21 @@ int main(void) {
   /* CREATE SHADERS*/
   // Create a shader using my GLSLObject class
   sivelab::GLSLObject shader;
-  shader.addShader("shaders/vertexShader_passthrough.glsl",
+  shader.addShader("shaders/vertexShader_withMatrixTransformation.glsl",
     sivelab::GLSLObject::VERTEX_SHADER);
   shader.addShader("shaders/fragmentShader_barycentricInterpolation.glsl",
     sivelab::GLSLObject::FRAGMENT_SHADER);
-  GLuint shaderProgram = shader.createProgram();
+  shader.createProgram();
+
+  // Uniform transformation matrices
+  GLuint projMatrixID, viewMatrixID;
+  projMatrixID = shader.createUniform("projMatrix");
+  viewMatrixID = shader.createUniform("viewMatrix");
+
+  // Camera attributes
+  glm::vec3 m_pos(0, 0, 0), m_viewDir(0, 0, -1);
+  glm::vec3 m_U(1, 0, 0), m_V(0, 1, 0), m_W(0, 0, 1);
+
 
   double timeDiff = 0.0,
          startFrameTime = 0.0, endFrameTime = 0.0;
@@ -177,9 +193,17 @@ int main(void) {
     // background color)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // create the view matrix from our camera data
+    glm::mat4 viewMatrix = glm::lookAt(m_pos, m_pos - m_W, m_V);
+
     /* Render your objects here */
     shader.activate();
-    glUniformMatrix4fv(shader.createUniform("projMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+
+
+    // copy from the host to the device the view matrix and the projection matrix
+    glUniformMatrix4fv(projMatrixID, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    glUniformMatrix4fv(viewMatrixID, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
