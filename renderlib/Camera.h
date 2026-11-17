@@ -3,6 +3,7 @@
 
 #include "Ray.h"
 #include "Framebuffer.h"
+#include "glm/gtc/matrix_transform.hpp"
 
 class Camera {
   public:
@@ -17,7 +18,7 @@ class Camera {
 
     virtual Ray generateRay(float x, float y) const = 0;
 
-    Point3 getOrigin() const { return origin; }
+    Point3 getOrigin() const { return pos; }
     Vec3 getU() const { return U; };
     Vec3 getV() const { return V; };
     Vec3 getW() const { return W; };
@@ -39,8 +40,12 @@ class Camera {
     Camera setViewportWidth(float new_viewport_width);
     Camera setViewportHeight(float new_viewport_height);
 
+    // OpenGL support
+    glm::mat4 getViewMatrix() const;
+    void adjustPos(int direction, const Vec3 &axis, float amount);
+
   protected:
-    Vec3 origin;
+    Vec3 pos;
     Vec3 U, V, W;
     int pixel_width, pixel_height;
     float viewport_width, viewport_height;
@@ -78,6 +83,20 @@ class PerspectiveCamera : public Camera {
 
   protected:
     float focal_length;
+};
+
+class OrthographicCamera : public Camera {
+  public:
+    OrthographicCamera(const Point3 &origin, const Vec3 &U, const Vec3 &V, const Vec3 &W, int pixel_width, int pixel_height, float viewport_width);
+    OrthographicCamera(const Point3 &origin, const Vec3 &U, const Vec3 &V, const Vec3 &W, int pixel_width, int pixel_height);
+    OrthographicCamera(const Point3 &origin, const Vec3 &U, const Vec3 &V, const Vec3 &W);
+    OrthographicCamera(const Point3 &origin, int pixel_width, int pixel_height, float viewport_width);
+    OrthographicCamera(int pixel_width, int pixel_height, float viewport_width);
+    OrthographicCamera(int pixel_width, int pixel_height);
+    OrthographicCamera();
+    // ~OrthographicCamera();
+
+    Ray generateRay(float x, float y) const override;
 };
 
 // Camera *cameraPtr = new PerspectiveCamera();

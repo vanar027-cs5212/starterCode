@@ -12,6 +12,8 @@
 
 #include "GLSL.h"
 
+#include "Camera.h"
+
 int CheckGLErrors(const char *s) {
   int errCount = 0;
   GLenum err;
@@ -26,6 +28,11 @@ struct vertexData {
     glm::vec3 pos;
     glm::vec3 color;
 };
+
+void ppos(const char *msg, Camera *camera) {
+  auto pos = camera->getOrigin();
+  printf("%s, pos: %f, %f, %f\n", msg, pos.x(), pos.y(), pos.z());
+}
 
 int main(void) {
   /* Initialize the library */
@@ -86,10 +93,19 @@ int main(void) {
   float right = halfWidth;
   float bottom = -halfHeight;
   float top = halfHeight;
-  float near = 5.0f;
-  float far = -5.0f;
-  glm::mat4 projectionMatrix =
-    glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, -10.0f, 10.0f);
+  float near = -5.0f;
+  float far = 5.0f;
+  glm::mat4 orthoMatrix =
+    glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, near, far);
+
+  float fov = glm::radians(45.0f);
+  float zNear = 0.1f;
+  float zFar = 100.0f;
+  glm::mat4 perspMatrix = glm::perspective(fov, aspectRatio, zNear, zFar);
+
+  // Toggle flag: start in perspective (or false for ortho)
+  bool usePerspective = true,
+       rotating = false;
 
   GLint major_version;
   glGetIntegerv(GL_MAJOR_VERSION, &major_version);
@@ -171,13 +187,17 @@ int main(void) {
   shader.createProgram();
 
   // Uniform transformation matrices
-  GLuint projMatrixID, viewMatrixID;
+  GLuint projMatrixID, viewMatrixID, modelMatrixID;
   projMatrixID = shader.createUniform("projMatrix");
   viewMatrixID = shader.createUniform("viewMatrix");
+  modelMatrixID = shader.createUniform("modelMatrix");
 
   // Camera attributes
-  glm::vec3 m_pos(0, 0, 0), m_viewDir(0, 0, -1);
-  glm::vec3 m_U(1, 0, 0), m_V(0, 1, 0), m_W(0, 0, 1);
+  // glm::vec3 m_pos(0, 0, 0.0f);
+  glm::vec3 m_viewDir(0, 0, -1);
+  // glm::vec3 m_U(1, 0, 0), m_V(0, 1, 0), m_W(0, 0, 1);
+
+  Camera *camera = new PerspectiveCamera(Vec3(0, 0, 0.0f), Vec3(1, 0, 0), Vec3(0, 1, 0), Vec3(0, 0, 1), winWidth, winHeight);
 
 
   double timeDiff = 0.0,
@@ -193,16 +213,25 @@ int main(void) {
     // background color)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glm::mat4 activeProjMatrix = orthoMatrix;
+    if (usePerspective) {
+      activeProjMatrix = perspMatrix * orthoMatrix;
+    }
     // create the view matrix from our camera data
-    glm::mat4 viewMatrix = glm::lookAt(m_pos, m_pos - m_W, m_V);
+    glm::mat4 viewMatrix = camera->getViewMatrix();
 
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    if (rotating) {
+      modelMatrix = glm::rotate(modelMatrix, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+    }
     /* Render your objects here */
     shader.activate();
 
 
     // copy from the host to the device the view matrix and the projection matrix
-    glUniformMatrix4fv(projMatrixID, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    glUniformMatrix4fv(projMatrixID, 1, GL_FALSE, glm::value_ptr(activeProjMatrix));
     glUniformMatrix4fv(viewMatrixID, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+    glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -214,6 +243,48 @@ int main(void) {
 
     /* Poll for and process events */
     glfwPollEvents();
+
+    float moveRatePerFrame = 0.05;
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+      // move up
+      camera->adjustPos(-1, camera->getV(), moveRatePerFrame);
+      ppos("w pressed", camera);
+    } else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+      // move down
+      camera->adjustPos(1, camera->getV(), moveRatePerFrame);
+      ppos("s pressed", camera);
+    } else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+      // move left
+      camera->adjustPos(1, camera->getU(), moveRatePerFrame);
+      ppos("a pressed", camera);
+    } else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+      // move right
+      camera->adjustPos(-1, camera->getU(), moveRatePerFrame);
+      ppos("d pressed", camera);
+    } else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+      // move forward
+      camera->adjustPos(1, camera->getW(), moveRatePerFrame);
+      ppos("e pressed", camera);
+    } else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+      // move backward
+      camera->adjustPos(-1, camera->getW(), moveRatePerFrame);
+      ppos("q pressed", camera);
+    }
+    // swap perspective mode
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+      usePerspective = true;
+      auto m_pos = camera->getOrigin().to_glm();
+      printf("Perspective mode enabled. m_pos: %f, %f, %f\n", m_pos.x, m_pos.y, m_pos.z);
+    } else if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+      usePerspective = false;
+      auto m_pos = camera->getOrigin().to_glm();
+      printf("Orthographic mode enabled. m_pos: %f, %f, %f\n", m_pos.x, m_pos.y, m_pos.z);
+    }
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+      rotating = !rotating;
+      printf("toggled rotation: %s", rotating ? "true" : "false");
+    }
 
     if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
       std::cout << "fps: " << 1.0 / timeDiff << std::endl;

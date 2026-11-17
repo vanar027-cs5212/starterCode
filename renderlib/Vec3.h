@@ -5,6 +5,8 @@
 #include <iostream>
 #include <format>
 
+#include "glm/glm.hpp"
+
 class Vec3 {
   public:
     double e[3];
@@ -57,6 +59,17 @@ class Vec3 {
 
     std::string toString() const {
       return "(" + std::to_string(e[0]) + ", " + std::to_string(e[1]) + ", " + std::to_string(e[2]) + ")";
+    }
+
+    static const Vec3 from_glm(const glm::vec3 &v) {
+      return Vec3(v.x, v.y, v.z);
+    }
+    static const glm::vec3 to_glm(const Vec3 &v) {
+      return glm::vec3(v.x(), v.y(), v.z());
+    }
+
+    glm::vec3 to_glm() const {
+      return glm::vec3(e[0], e[1], e[2]);
     }
 };
 
